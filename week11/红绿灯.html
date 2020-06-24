@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        #signalLamp{
+            width: 330px;
+            height: 100px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .lamp{
+            width: 100px;
+            height: 100px;
+            background-color: grey;
+            border-radius: 50%;
+        }
+        .green.light{
+            background-color: green;
+        }
+        .yellow.light{
+            background-color: yellow;
+        }
+        .red.light{
+            background-color: red;
+        }
+
+    </style>
+</head>
+<body>
+<div id="signalLamp">
+    <div class="lamp green"></div>
+    <div class="lamp yellow"></div>
+    <div class="lamp red"></div>
+</div>
+<script>
+    //红绿灯变换函数
+    function green() {
+        let light = document.getElementsByClassName('lamp')
+        for (let i = 0; i < 3; i ++)
+            light[i].classList.remove('light')
+        document.getElementsByClassName('green')[0].classList.add('light')
+    }
+    function yellow() {
+        let light = document.getElementsByClassName('lamp')
+        for (let i = 0; i < 3; i ++)
+            light[i].classList.remove('light')
+        document.getElementsByClassName('yellow')[0].classList.add('light')
+    }
+    function red() {
+        let light = document.getElementsByClassName('lamp')
+        for (let i = 0; i < 3; i ++)
+            light[i].classList.remove('light')
+        document.getElementsByClassName('red')[0].classList.add('light')
+    }
+    //上古时代
+    function go() {
+        green()
+        setTimeout(function () {
+            yellow()
+            setTimeout(function () {
+                red()
+                setTimeout(function () {
+                    go()
+                },5000)
+            },2000)
+        },10000)
+    }
+    //promise
+    function sleep(t) {
+        return new Promise((resolve, reject) => {
+            setTimeout(resolve,t)
+        })
+    }
+    function pro_go() {
+        green()
+        sleep(10000).then(() => {
+            yellow()
+            return sleep(2000)
+        }).then(() => {
+            red()
+            return sleep(5000)
+        }).then(pro_go)
+    }
+    //async-wait
+    async function a_w_go() {
+        while (true) {
+            green()
+            await sleep(10000)
+            yellow()
+            await sleep(2000)
+            red()
+            await sleep(5000)
+        }
+    }
+    //generator函数
+    function* g_go() {
+        while (true) {
+            green()
+            yield sleep(10000);
+            yellow()
+            yield sleep(2000);
+            red()
+            yield sleep(5000);
+        }
+    }
+    function run(iterator) {
+        let {value, done} = iterator.next()
+        if (done) return false
+        if (value instanceof Promise) {
+            value.then(() => {
+                run(iterator)
+            })
+        }
+    }
+    function co(generator) {
+        return function () {
+            return run(generator())
+        }
+    }
+    let ggo = co(g_go)
+
+    //手动控制
+    function happen(element, eventName) {
+        return new Promise((resolve, reject) => {
+            element.addEventListener(eventName,resolve,{once : true})
+        })
+    }
+    async function n_go(){
+        while(true) {
+            green();
+            await happen(document.getElementById('next'), 'click');
+            yellow();
+            await happen(document.getElementById('next'), 'click');
+            red();
+            await happen(document.getElementById('next'), 'click');
+        }
+    }
+</script>
+</body>
+</html>
